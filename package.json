@@ -1,0 +1,1 @@
+{"description":"A GitHub-compatible git forge with a compiled Go core: the lifecycle shell in main.ts starts the vendored forge binary and speaks the harness handshake","engines":{"node":">=22.18"},"license":"MIT","name":"github-core-v2","private":true,"scripts":{"start":"node --experimental-strip-types main.ts"},"type":"module","version":"0.0.0"}
