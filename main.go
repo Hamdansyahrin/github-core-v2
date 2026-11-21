@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"sync"
@@ -94,7 +95,11 @@ func (s *server) authorized(r *http.Request) bool {
 
 // Answer with a JSON body and the headers every reply carries.
 func sendJson(w http.ResponseWriter, status int, body any, headers map[string]string) {
-	text := marshalJSON(body)
+	sendJsonBytes(w, status, marshalJSON(body), headers)
+}
+
+// Answer with pre-marshalled JSON bytes and the headers every reply carries.
+func sendJsonBytes(w http.ResponseWriter, status int, text []byte, headers map[string]string) {
 	header := w.Header()
 	header.Set("content-type", jsonType)
 	header.Set("content-length", strconv.Itoa(len(text)))
@@ -279,6 +284,9 @@ func matchGitRoute(path string) (owner, repo, service string, ok bool) {
 }
 
 func main() {
+	// The store only grows and every request allocates; a lazier GC trades a little
+	// memory for measurably less collector work on the request path.
+	debug.SetGCPercent(300)
 	forge := NewForge()
 	srv := &server{forge: forge, token: os.Getenv("MAKEFUN_SHOP_TOKEN")}
 	listener, err := net.Listen("tcp", ":0")

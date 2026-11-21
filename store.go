@@ -266,6 +266,12 @@ type IssueRec struct {
 	Comments   []*CommentRec
 	CreatedTs  int64
 	UpdatedTs  int64
+	// Memoised issueJson bytes for the single-issue GET, valid while the fingerprint
+	// (UpdatedTs, len(Comments)) matches: every mutation of a rendered field either
+	// bumps UpdatedTs (REST patch, GraphQL close) or appends a comment.
+	CacheBytes    []byte
+	CacheTs       int64
+	CacheComments int
 }
 
 type PullRec struct {

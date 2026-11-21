@@ -1152,7 +1152,15 @@ func routeRest(ctx *restCtx, segments []string, raw []byte) {
 				return
 			}
 			if method == "GET" {
-				sendJson(w, 200, issueJson(repo, issue), nil)
+				if issue.CacheBytes != nil && issue.CacheTs == issue.UpdatedTs && issue.CacheComments == len(issue.Comments) {
+					sendJsonBytes(w, 200, issue.CacheBytes, nil)
+					return
+				}
+				text := marshalJSON(issueJson(repo, issue))
+				issue.CacheBytes = text
+				issue.CacheTs = issue.UpdatedTs
+				issue.CacheComments = len(issue.Comments)
+				sendJsonBytes(w, 200, text, nil)
 				return
 			}
 			if method == "PATCH" {
